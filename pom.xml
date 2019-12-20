@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.flying.cattle</groupId>
+	<artifactId>match-trade</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.1.RELEASE</version>
+	</parent>
+
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<!-- 打包跳过单元测试 -->
+		<skipTests>true</skipTests>
+		<!-- 私有包版本 -->
+		<fastjson.version>1.2.57</fastjson.version>
+		<hazelcast-jet.version>3.1</hazelcast-jet.version>
+		<guava.version>r09</guava.version>
+		<disruptor.version>3.4.2</disruptor.version>
+		<springfox-swagger2>2.9.2</springfox-swagger2>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- 数据库 Start -->
+			<dependency>
+				<groupId>com.hazelcast.jet</groupId>
+				<artifactId>hazelcast-jet</artifactId>
+				<version>${hazelcast-jet.version}</version>
+			</dependency>
+			<!-- 数据库 End -->
+			<!-- 工具jar Start -->
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson.version}</version>
+			</dependency>
+			<!-- 工具jar end -->
+			<!-- disruptor Start -->
+			<dependency>
+				<groupId>com.lmax</groupId>
+				<artifactId>disruptor</artifactId>
+				<version>${disruptor.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<!-- disruptor End -->
+		</dependencies>
+	</dependencyManagement>
+	<modules>
+		<module>match-engine</module>
+		<module>match-service</module>
+	</modules>
+</project>

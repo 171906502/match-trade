@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>欢迎页面</title>
+
+<style type="text/css">
+body {
+	background: #fff;
+	font: normal 12px/22px 宋体;
+}
+
+table {
+	width: 200px;
+	frame: below;
+	text-align: center;
+}
+</style>
+<script type="text/javascript" src="/js/jquery1.42.min.js"></script>
+<script type="text/javascript">
+    var sock = null;
+    //服务器的地址
+    var wsuri = "ws://127.0.0.1:8080/echoDept?queue=XBIT-USDT";
+    window.onload = function() {
+        sock = new WebSocket(wsuri);
+        sock.onopen = function() {
+            //成功连接到服务器
+            console.log("connected to " + wsuri);
+        }
+        sock.onclose = function(e) {
+            console.log("connection closed (" + e.code + ")");
+        }
+        sock.onmessage = function(e) {
+            //服务器发送通知
+            var obj= e.data;
+            var msg = JSON.parse(obj)
+           	if(msg.type == "depth"){
+           		var data = msg.data;
+           		//买
+           		var buys = data.buy
+           		var buy_size = buys.length>10?10:buys.length;
+           		for (i = 0; i < buy_size; i++) { 
+           			var depth = buys[i];
+           			$("#buy"+i).children().eq(0).html(depth.price);
+           			$("#buy"+i).children().eq(1).html(depth.number);
+           			$("#buy"+i).children().eq(2).html(depth.total);
+           		}
+           		//卖
+           		var sells = data.sell
+           		var sell_size = sells.length>10?10:sells.length;
+           		for (i = 0; i < sell_size; i++) { 
+           			var depth = sells[i];
+           			$("#sell"+i).children().eq(0).html(depth.price);
+           			$("#sell"+i).children().eq(1).html(depth.number);
+           			$("#sell"+i).children().eq(2).html(depth.total);
+           		}
+           	}
+        }
+    };
+</script>
+</head>
+
+<body>
+	<a href="javascript:aa()">超链接3</a>
+	<table id="sell" frame=below>
+		<tr id="sell9">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell8">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell7">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell6">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell5">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell4">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell3">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell2">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell1">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="sell0">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+	<table id="buy">
+		<tr id="buy0">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy1">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy2">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy3">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy4">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy5">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy6">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy7">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy8">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr id="buy9">
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+</body>
+</html>
