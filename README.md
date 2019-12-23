@@ -14,11 +14,11 @@
 match-trade超高效的交易所撮合引擎，采用伦敦外汇交易所LMAX开源的Disruptor框架，用Hazelcast进行分布式内存存取，以及原子性操作。使用数据流的方式进行计算撮合序列，才用价格水平独立撮合逻辑，实现高效大数据撮合。
 
 #### 优势
-- ***match-trade***是以水平价格为独立撮合逻辑，相比于别的**订单队列**为撮合队列的交易引擎来说，价格区间越小订单数越大时，性能越明显。
-- ***match-trade***没个价格下的订单都是**异步**完成被撮合。独立价格下订单不影响下一个新发生的撮合。
-- ***match-trade***每个价格撮合都是**独立的**，与下一个价格没的关系，实现快速吃单。
-- ***match-trade***每个新的订单经历撮合处理器后，后续逻辑采用**并行**处理，能更快速反馈数据撮合结果。
-- ***match-trade***撤单走独立的逻辑，不用和下单在一个处理序列。
+- ***match-engine***是以水平价格为独立撮合逻辑，相比于别的**订单队列**为撮合队列的交易引擎来说，价格区间越小订单数越大时，性能越明显。
+- ***match-engine***没个价格下的订单都是**异步**完成被撮合。独立价格下订单不影响下一个新发生的撮合。
+- ***match-engine***每个价格撮合都是**独立的**，与下一个价格没的关系，实现快速吃单。
+- ***match-engine***每个新的订单经历撮合处理器后，后续逻辑采用**并行**处理，能更快速反馈数据撮合结果。
+- ***match-engine***撤单走独立的逻辑，不用和下单在一个处理序列。
 
 ## 描述
 **用户输入包括：**
@@ -29,6 +29,67 @@ match-trade超高效的交易所撮合引擎，采用伦敦外汇交易所LMAX�
 - 限价委托单    
     限价委托单是在当前的加密货币交易环境中最常用的委托类型。这种委托单允许用户指定一个价格，只有当撮合引擎找到同样价格甚至更好价格的对手单时才执行交易。
 - 市价委托单   
-    市价委托单的撮合会完全忽略价格因素，而致力于有限完成指定数量的成交。市价委托单在交易委托账本中有较高的优先级，在流动性充足的市场中市价单可以保证成交。
+    市价委托单的撮合会完全忽略价格因素，而致力于有限完成指定数量的成交。市价委托单在交易委托账本中有较高的优先级，在流动性充足的市场中市价单可以保证成交。不充足时，撮合完最后一条撤销。
 - 止损委托单   
-    止损委托单尽在市场价格到达指定价位时才被激活，因此它的执行方式与市价委托单相反。一旦止损委托单激活，它们可以自动转化为市价委托单或限价委托单。
+    止损委托单尽在市场价格到达指定价位时才被激活，因此它的执行方式与市价委托单相反。一旦止损委托单激活，它们可以自动转化为市价委托单或限价委托单。（未实现）
+
+## 撮合流程
+限价撮合：
+![输入图片说明](https://images.gitee.com/uploads/images/2019/1223/093137_a98aa989_538536.jpeg "limit.jpg")
+
+市价撮合：
+![输入图片说明](https://images.gitee.com/uploads/images/2019/1223/093204_e3020309_538536.jpeg "market.jpg")
+目前就实现这两种订单撮合
+
+## 订单簿为撮合簿时代码解析
+这个是一个简单流盘口计算demo
+```
+//获取匹配的订单薄数据
+IMap<Long, Order> outMap = hzInstance.getMap(HzltUtil.getMatchKey(coinTeam, isBuy));
+/**
+ * -★
+ * -使用Java 8 Stream API中的并行流来计算最优
+ * -能快速的拿到撮合对象，不用排序取值，降低性能消耗
+ */
+Order outOrder = outMap.values().parallelStream().min(HzltUtil::compareOrder).get();
+
+//这种方式最难的，就是整理盘口深度数据了
+
+    /**
+     * -★
+	 * -获取行情深度
+	 * 
+	 * @param coinTeam 交易队
+	 * @param isBuy    是否是买
+	 * @return List<Depth>
+	 */
+	public List<Depth> getMarketDepth(String coinTeam, Boolean isBuy) {
+		List<Depth> depths = new ArrayList<Depth>();
+		IMap<Long, Order> map = hzInstance.getMap(HzltUtil.getMatchKey(coinTeam, isBuy));
+		if (map.size() > 0) {
+			/**
+			 * -这个流：主要是安价格分组和统计，使用并行流快速归集。
+			 */ 
+			List<Depth> list = map.entrySet().parallelStream().map(mo -> mo.getValue())
+					.collect(Collectors.groupingBy(Order::getPrice)).entrySet().parallelStream()
+					.map(ml -> new Depth(ml.getKey().toString(),
+							ml.getValue().stream().map(o -> o.getUnFinishNumber()).reduce(BigDecimal.ZERO, BigDecimal::add)
+									.toString(),
+							"0", 1, coinTeam, isBuy))
+					.sorted((d1, d2) -> HzltUtil.compareTo(d1, d2)).collect(Collectors.toList());
+			/**
+			 * -这个流：主要是盘口的累计计算，因涉及排序选择串行流
+			 */
+			list.stream().reduce(new Depth("0", "0", "0", 1, coinTeam, isBuy), (one, two) -> {
+				one.setTotal((new BigDecimal(one.getTotal()).add(new BigDecimal(two.getNumber()))).toString());
+				depths.add(new Depth(two.getPrice(), two.getNumber(), one.getTotal(), two.getPlatform(),
+						two.getCoinTeam(), two.getIsBuy()));
+				return one;
+			});
+		} else {
+			Depth depth = new Depth("0", "0", "0", 1, coinTeam, isBuy);
+			depths.add(depth);
+		}
+		return depths;
+	}
+```
