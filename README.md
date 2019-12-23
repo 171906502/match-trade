@@ -93,3 +93,7 @@ Order outOrder = outMap.values().parallelStream().min(HzltUtil::compareOrder).ge
 		return depths;
 	}
 ```
+## 测试结果
+Disruptor单生产者添加10万不能撮合的订单耗时：约700毫秒
+Disruptor多生产者添加10万不能撮合的订单耗时：约20秒
+实际单吃完1-100价格内随机数量的10万订单耗时：约400毫秒
