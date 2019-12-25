@@ -42,7 +42,7 @@ public class MatchOutResources {
 	}
 	
 	/**
-	 * @Title: pusb_depth
+	 * @Title: push_depth
 	 * @Description: TODO(订单变化)
 	 * @param  echo
 	 * @return void 返回类型
@@ -55,7 +55,7 @@ public class MatchOutResources {
 	
 
 	/**
-	 * @Title: pusb_depth
+	 * @Title: push_depth
 	 * @Description: TODO(新的交易记录)
 	 * @return void 返回类型
 	 * @throws
