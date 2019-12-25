@@ -4,7 +4,7 @@
  * Copyright(c) 2020 flying-cattle Co. Ltd. 
  * All right reserved. 
  */
-package com.flying.cattle.exchange.controller;
+package com.flying.cattle.exchange.data;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,8 +60,8 @@ public class MatchOutResources {
 	 * @return void 返回类型
 	 * @throws
 	 */
-	@KafkaListener(id = "new_tarde", topics = "new_tarde")
-	public void new_tarde(String echo) {
+	@KafkaListener(id = "new_trade", topics = "new_trade")
+	public void new_trade(String echo) {
 		log.info("~~~交易信息："+echo);
 	}
 }
