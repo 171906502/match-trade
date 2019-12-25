@@ -33,7 +33,7 @@ public class PushData {
 	/**
 	 * @Title: PushOrder
 	 * @Description: TODO(推送订单变化)
-	 * @param  MatchOrder
+	 * @param  order
 	 * @return void 返回类型
 	 * @throws
 	 */
@@ -51,16 +51,16 @@ public class PushData {
 	/**
 	 * @Title: PushOrder
 	 * @Description: TODO(推送订单变化)
-	 * @param  Trade
+	 * @param  trade
 	 * @return void 返回类型
 	 * @throws
 	 */
-	public void addTrade(Trade tarde) {
+	public void addTrade(Trade trade) {
 		try {
-			template.send("new_tarde", tarde.toJsonString());
+			template.send("new_trade", trade.toJsonString());
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error("===推送交易失败，数据原型为："+tarde.toJsonString());
+			log.error("===推送交易失败，数据原型为："+trade.toJsonString());
 		}
 	}
 }
