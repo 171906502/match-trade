@@ -37,26 +37,6 @@ public class HazelcastConfig {
 				.setBackupCount(1).setReadBackupData(true);// 默认从主库读写
 
 		config.setInstanceName(instanceKey).addMapConfig(mapConfig).setGroupConfig(gc);
-		//config.getCPSubsystemConfig().setCPMemberCount(3); //设置子系统
-		// 正式环境
-		if ("prod".equals(app_active)) {
-			NetworkConfig network = config.getNetworkConfig();
-			JoinConfig join = network.getJoin();
-			join.getMulticastConfig().setEnabled(false);
-			join.getTcpIpConfig().addMember("172.31.225.235").setRequiredMember("172.31.225.235").setEnabled(true);
-			join.getTcpIpConfig().addMember("172.31.225.234").setRequiredMember("172.31.225.234").setEnabled(true);
-			join.getTcpIpConfig().addMember("172.31.225.242").setRequiredMember("172.31.225.242").setEnabled(true);
-			network.getInterfaces().setEnabled(true).addInterface("172.31.225.*");
-			config.setNetworkConfig(network);
-			// 开发环境
-		} else if ("dev".equals(app_active)) {
-			NetworkConfig network = config.getNetworkConfig();
-			JoinConfig join = network.getJoin();
-			join.getMulticastConfig().setEnabled(Boolean.FALSE);
-			join.getKubernetesConfig().setEnabled(Boolean.TRUE).setProperty("service-dns",
-					"power-match.dev.svc.cluster.local");
-			config.setNetworkConfig(network);
-		}
 		return config;
 	}
 
